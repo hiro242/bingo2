@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>文字ビンゴ（FREEなし）</title>
+<style>
+body {
+  font-family: Arial, sans-serif;
+  text-align: center;
+  background: #f5f5f5;
+}
+h1 {
+  margin-top: 20px;
+}
+table {
+  margin: 20px auto;
+  border-collapse: collapse;
+}
+td {
+  width: 120px;
+  height: 80px;
+  border: 2px solid #333;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  background: white;
+  user-select: none;
+  padding: 5px;
+}
+td.checked {
+  background: #4caf50;
+  color: #fff;
+}
+button {
+  padding: 10px 16px;
+  font-size: 16px;
+  margin: 5px;
+}
+</style>
+</head>
+
+<body>
+
+<h1>歩活ビンゴ</h1>
+
+<table id="bingo"></table>
+
+<button onclick="clearCheck()">チェック解除</button>
+<button onclick="shuffleBingo()">シャッフル</button>
+
+<script>
+const size = 5;
+const table = document.getElementById("bingo");
+const STORAGE_KEY = "bingo_text_no_free_v2";
+
+/* ===== 25個の文字 ===== */
+const words = [
+  "1.３日平均15,000歩",
+  "2.１日階段を５００段上る※石井は1000段",
+  "3.春の食べれる野草見つける※増田さんは食べる(洗ってね)",
+  "4.ストレッチ１５分スクワット３０回５セット",
+  "5.3km走る※中川部長は20km 30代は10km 40代は5km",
+  "6.昼休み休憩３０分歩く",
+  "7.朝日が昇る前に5000歩達成",
+  "8.同僚と歩く",
+  "9.歩活っぽい人を見つける※盗撮は禁止なので、ばれない様に",
+  "10.5cm以上の昆虫を見つける※大隈係長は家にいるもの禁止でかつ10cm以上",
+  "11.雨の日に12,000歩※雨具なしであれば5,000歩でも可",
+  "12.出張先旅行先で３０分歩く※飲酒後であれば歩数が減るため１時間",
+  "13.１日25,000歩達成※中川部長は30,000歩を２日",
+  "14.ハザードマップを確認し、最寄りの避難場所へ行く",
+  "15.街なかの危険箇所発見し、官公庁へ報告する※柳原課長は協議記録の提出含む",
+  "16.両性花を見つける",
+  "17.川の名板河川看板を撮影し、水面の高さ変化を確認する※２回行き確認する",
+  "18.休日徒歩でスーパーへ行き、店の前で総菜を頬張る（試食で実施は禁止、お店に迷惑はかけない）",
+  "19.２日平均20,000歩",
+  "20.ワールドカップ出場国旗（アジア・北アメリカ以外）を見つける※大畑代理はアフリカ大陸のみ",
+  "21.出勤前及び帰宅後１時間の散歩",
+  "22.４以上の数字が入っている公園へ行く（例：第四●●公園）",
+  "23.有人の交番を見つける",
+  "24.他社の踏切で漢字３文字以上の踏切をみつける※山本代理は４文字以上（笑）",
+  "25.最寄り駅から２駅手前から帰宅"
+];
+/* ====================== */
+
+// 保存データ読込み
+const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+
+// シャッフル
+const shuffled = [...words].sort(() => Math.random() - 0.5);
+
+let cells = [];
+let index = 0;
+
+// ビンゴ表作成
+for (let r = 0; r < size; r++) {
+  const tr = document.createElement("tr");
+  for (let c = 0; c < size; c++) {
+    const td = document.createElement("td");
+    const cellIndex = r * size + c;
+
+    td.textContent = saved?.words?.[cellIndex] ?? shuffled[index++];
+
+    td.onclick = () => {
+      td.classList.toggle("checked");
+      save();
+    };
+
+    if (saved?.checked?.[cellIndex]) {
+      td.classList.add("checked");
+    }
+
+    cells.push(td);
+    tr.appendChild(td);
+  }
+  table.appendChild(tr);
+}
+
+// 保存処理
+function save() {
+  const data = {
+    words: cells.map(td => td.textContent),
+    checked: cells.map(td => td.classList.contains("checked"))
+  };
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}
+
+// ✅ チェックだけ解除（文字はそのまま）
+function clearCheck() {
+  cells.forEach(td => td.classList.remove("checked"));
+  save();
+}
+
+// ✅ シャッフル（文字を入れ替え）
+function shuffleBingo() {
+  localStorage.removeItem(STORAGE_KEY);
+  location.reload();
+}
+</script>
+
+</body>
+</html>
